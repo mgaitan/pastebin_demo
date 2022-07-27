@@ -26,7 +26,6 @@ import magic
 import pyclip
 from docopt import DocoptExit, docopt
 from github import Github, GithubException
-
 from rich import print
 
 __version__ = "0.1"
@@ -88,13 +87,13 @@ def main(argv=None) -> None:
             # file already exists
             if args["--new"]:
                 new_path = f"{path.stem}_{secrets.token_urlsafe(8)}{path.suffix}"
-                print(f"{path.name} already exists. Creating as {new_path}.", file=sys.stderr)
+                print(f"[bold yellow]warning:[/bold yellow] {path.name} already exists. Creating as {new_path}.", file=sys.stderr)
                 result = repo.create_file(f"{directory}/{new_path}", message, file_content)
 
             else:           
                 # TODO commit all the files in a single commit
                 contents = repo.get_contents(f"{directory}/{path.name}")
-                print(f"{path.name} already exists. Updating it.", file=sys.stderr)
+                print(f"[bold yellow]warning:[/bold yellow]: {path.name} already exists. Updating it.", file=sys.stderr)
                 result = repo.update_file(f"{directory}/{path.name}", message, file_content, contents.sha)
         uploaded += 1
 
