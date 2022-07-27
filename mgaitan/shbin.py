@@ -27,6 +27,8 @@ import pyclip
 from docopt import DocoptExit, docopt
 from github import Github, GithubException
 
+from rich import print
+
 __version__ = "0.1"
 
 
