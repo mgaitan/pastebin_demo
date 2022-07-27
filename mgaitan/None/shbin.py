@@ -31,7 +31,6 @@ __version__ = "0.1"
 
 
 
-
 class FakePath:
     """
     A wrapper on a PurePath object (ie it doesn’t actually access a filesystem) 
@@ -65,7 +64,7 @@ def main(argv=None) -> None:
     if args["--from-clipboard"]:
         content = pyclip.paste()
         if args["--target"]:
-            path_name = args.target_path
+            path_name = args['--target']
         else:
             extension = guess_extension(magic.from_buffer(content, mime=True))
             path_name = f"{secrets.token_urlsafe(8)}{extension}"
@@ -76,6 +75,7 @@ def main(argv=None) -> None:
         directory = f"{user}/{args['--target']}".rstrip("/")
     
     message = args["--message"] or ""
+    uploaded = 0
     for path in files:
         file_content = path.read_bytes()
 
@@ -83,19 +83,21 @@ def main(argv=None) -> None:
             result = repo.create_file(f"{directory}/{path.name}", message, file_content)
         except GithubException:
             # file already exists
-            if args.new:
+            if args["--new"]:
                 new_path = f"{path.stem}_{secrets.token_urlsafe(8)}{path.suffix}"
                 print(f"{path.name} already exists. Creating as {new_path}.", file=sys.stderr)
                 result = repo.create_file(f"{directory}/{new_path}", message, file_content)
 
-            else:                
-                contents = repo.get_contents(f"{user}/{path.name}")
+            else:           
+                # TODO commit all the files in a single commit
+                contents = repo.get_contents(f"{directory}/{path.name}")
                 print(f"{path.name} already exists. Updating it.", file=sys.stderr)
                 result = repo.update_file(f"{directory}/{path.name}", message, file_content, contents.sha)
+        uploaded += 1
 
-    url = result["commit"].html_url if len(files) > 1 else result["content"].html_url
-    print(url)
+    url = result["content"].html_url.rpartition("/")[0] if uploaded > 1 else result["content"].html_url
     pyclip.copy(url)
+    print(url)
     
 
 if __name__ == "__main__":
