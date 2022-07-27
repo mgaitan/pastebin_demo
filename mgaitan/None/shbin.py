@@ -95,6 +95,7 @@ def main(argv=None) -> None:
                 result = repo.update_file(f"{directory}/{path.name}", message, file_content, contents.sha)
         uploaded += 1
 
+    import ipdb;ipdb.set_trace()
     url = result["content"].html_url.rpartition("/")[0] if uploaded > 1 else result["content"].html_url
     pyclip.copy(url)
     print(url)
